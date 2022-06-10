@@ -14,15 +14,6 @@ class Assortiment {
 
         list.add(
             Product(
-                "Milk",
-                EnumTypeProduct.FOOD,
-                EnumCategory.MilksProducts,
-                1, 2, 0.5
-            )
-        )
-
-        list.add(
-            Product(
                 "Bred",
                 EnumTypeProduct.FOOD,
                 EnumCategory.Breds, 1, 2, 0.5
@@ -53,21 +44,21 @@ class Assortiment {
         list.add(
             Product(
                 "MicrowaveOven", EnumTypeProduct.MEDIUMSIZED,
-                EnumCategory.MediumHousehold, 1, 2, 0.5
+                EnumCategory.MediumHousehold, 1, 2, 5.5
             )
         )
 
         list.add(
             Product(
                 "Fridge", EnumTypeProduct.LARGESIZED,
-                EnumCategory.LargeHousehold, 1, 2, 0.5
+                EnumCategory.LargeHousehold, 1, 2, 20.0
             )
         )
 
         list.add(
             Product(
                 "Sofa", EnumTypeProduct.LARGESIZED,
-                EnumCategory.LargeHousehold, 1, 2, 0.5
+                EnumCategory.LargeHousehold, 1, 2, 50.0
             )
         )
     }

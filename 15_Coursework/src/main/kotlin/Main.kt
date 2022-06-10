@@ -1,4 +1,6 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
+fun main() {
 
+    val truck=Truck(Tonnage.LARGE)
+    truck.printLoadProductTruck()
+    println("Current tonnage: ${truck.currentTonnage}")
 }
