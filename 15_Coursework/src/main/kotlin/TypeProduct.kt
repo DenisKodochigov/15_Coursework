@@ -1,3 +1,3 @@
-object TypeProduct {
-    var typeProduct= mutableListOf<String>()
+open class TypeProduct(open var typeProduct: EnumTypeProduct) {
+
 }

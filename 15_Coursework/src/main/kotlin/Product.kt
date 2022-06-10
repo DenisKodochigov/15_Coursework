@@ -1,8 +1,9 @@
-class Product(
-    name:String,
-    typeProduct:TypeProduct,
-    timeUnload:Double,
-    timeLoad:Double,
-    weight:Double
-) {
+open class Product(
+    val name: String,
+    override var typeProduct: EnumTypeProduct,
+    val category: EnumCategory,
+    val timeUnload: Int,
+    val timeLoad: Int,
+    val weight: Double
+) : CategoryProduct(category, typeProduct) {
 }
