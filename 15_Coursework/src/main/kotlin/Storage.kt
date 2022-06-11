@@ -1,50 +1,59 @@
-import kotlin.coroutines.CoroutineContext
-
 class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
 ) {
     var storageProduct = mutableMapOf<Product, Int>()
+    var listUnloadDoc = mutableListOf<Doc>()
+    var listLoadDoc = mutableListOf<Doc>()
+    var listLoadDocInt = mutableListOf<LoadTruck>()
 
+    init {
+        for (i in 1..numberUnloadDock) {
+            val doc = Doc(false, TypeDoc.UNLOAD, "Doc ${TypeDoc.UNLOAD} N: $i", storageProduct)
+            listUnloadDoc.add(doc)
+            println("Create Doc ${TypeDoc.UNLOAD} N: $i")
+        }
+        for (i in 1..numberLoadDock) {
+            val doc = Doc(false, TypeDoc.LOAD, "Doc ${TypeDoc.LOAD} N: $i", storageProduct)
+            listLoadDoc.add(doc)
+            listLoadDocInt.add(doc)
+            println("Create Doc ${TypeDoc.LOAD} N: $i")
+        }
+//        val assortment = Assortment()
+//        Создал пустой склад со всей ожидаемой номеклатурой
+        assortment.list.forEach { storageProduct[it] = 0 }
 
-//    var unloadDoc = mutableListOf<CoroutineContext>()
-//    var loadDoc = mutableListOf<CoroutineContext>()
+    }
 
-//    init {
-//        for (i in 1..numberUnloadDock) unloadDoc.add(createUnloadDoc()!!)
-//        for (i in 1..numberLoadDock) loadDoc.add(createLoadDoc()!!)
-//    }
-//
-//    fun createUnloadDoc(): CoroutineContext {
-//
-//        return null
-//    }
-//
-//    fun createLoadDoc(): CoroutineContext {
-//
-//        return null
-//    }
-//
-//    fun unloadProductFromStorage(product: Product, quantity: Int):Int {
-//        //код по получению элементов из хранилища
-//
-//        // Долны бать проверки на количество на складе и временные задержки отгрузки.
-//        var storageQuantity = storageProduct[product]
-//        if (storageQuantity!! > quantity) storageProduct[product]?.minus(quantity)
-//        else{
-//            storageProduct.remove(product)
-//            if (storageQuantity!! < quantity) storageQuantity-=quantity
-//            else{
-//
-//            }
-//        }
-//        return storageQuantity
-//    }
-//
-//    fun loadProductToStorage(product: Product, quantity: Int) {
-//        //код по размещения продукта в хранилище
-//        // Проверить на наличие этого товара на складе и добавить его.
-//        storageProduct[product]?.plus(quantity)
-//    }
+    fun inputProduct(listProduct: MutableMap<Product, Int>) {
+        listProduct.forEach { (t, q) ->
+            if (storageProduct[t] == null) storageProduct[t] = q
+            else storageProduct[t] = storageProduct[t]!! + q
+        }
+    }
 
+    fun outputProduct(doc: Doc) {
+        if (doc.typeDoc != TypeDoc.LOAD) return
+        // Подготовить массив только для одного товара
+        doc.flowLoad()
+    }
+
+    //Печать состава продуктов в подЪезжающем грузовике.
+    fun printLoadProductStorage() {
+        val listProduct = mutableMapOf<Product, Int>()
+        storageProduct.forEach { (t, u) ->
+            if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
+            else listProduct[t] = u
+        }
+        listProduct.forEach { (t, u) -> println("Product: ${t.name}; quantity: $u; total weight:${u * t.weight} ") }
+    }
+
+    fun copyProductToDoc(doc: LoadTruck) {
+        val selectCategory = EnumCategory.values().random()
+        storageProduct.forEach { p, q ->
+            if (p.category == selectCategory) {
+                doc.listProduct[p] = q
+            }
+        }
+    }
 }
