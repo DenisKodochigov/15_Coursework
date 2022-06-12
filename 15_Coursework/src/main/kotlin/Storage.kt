@@ -2,27 +2,52 @@ class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
 ) {
-    var storageProduct = mutableMapOf<Product, Int>()
+    private var storageProduct = mutableMapOf<Product, Int>()
     var listUnloadDoc = mutableListOf<Doc>()
     var listLoadDoc = mutableListOf<Doc>()
     var listLoadDocInt = mutableListOf<LoadTruck>()
 
     init {
+//        Создал пустой склад со всей ожидаемой номеклатурой
+        assortment.list.forEach { storageProduct[it] = 50 }
+
         for (i in 1..numberUnloadDock) {
-            val doc = Doc(false, TypeDoc.UNLOAD, "Doc ${TypeDoc.UNLOAD} N: $i", storageProduct)
+            val doc = Doc(false, TypeDoc.UNLOAD, "Doc-${TypeDoc.UNLOAD}_N:$i", storageProduct)
             listUnloadDoc.add(doc)
-            println("Create Doc ${TypeDoc.UNLOAD} N: $i")
+            println("Create Doc-${TypeDoc.UNLOAD}_N:$i")
         }
         for (i in 1..numberLoadDock) {
-            val doc = Doc(false, TypeDoc.LOAD, "Doc ${TypeDoc.LOAD} N: $i", storageProduct)
+            val doc = Doc(false, TypeDoc.LOAD, "Doc-${TypeDoc.LOAD}_N:$i", storageProduct)
             listLoadDoc.add(doc)
             listLoadDocInt.add(doc)
-            println("Create Doc ${TypeDoc.LOAD} N: $i")
+            println("Create Doc-${TypeDoc.LOAD}_N:$i")
         }
-//        val assortment = Assortment()
-//        Создал пустой склад со всей ожидаемой номеклатурой
-        assortment.list.forEach { storageProduct[it] = 0 }
+    }
 
+    //Печать состава продуктов в подЪезжающем грузовике.
+    fun printLoadProductToStorage() {
+        val rollListProduct = mutableMapOf<Product, Int>()
+//        storageProduct.forEach { (t, u) ->
+//            if (rollListProduct[t] != null) rollListProduct[t] = rollListProduct[t]!! + u
+//            else rollListProduct[t] = u
+//        }
+        var currentTypeProduct = EnumTypeProduct.FOOD
+        println("\nState Storage:")
+        storageProduct.forEach { (p, q) ->
+            if (currentTypeProduct == p.typeProduct){
+                print("${p.name}: $q; ")
+            }else{
+                currentTypeProduct = p.typeProduct
+                print("\n${currentTypeProduct}: ${p.name}: $q; ")
+            }
+        }
+        println("")
+    }
+
+    fun outputProduct(doc: Doc) {
+        if (doc.typeDoc != TypeDoc.LOAD) return
+        // Подготовить массив только для одного товара
+        doc.flowLoad()
     }
 
     fun inputProduct(listProduct: MutableMap<Product, Int>) {
@@ -32,28 +57,4 @@ class Storage(
         }
     }
 
-    fun outputProduct(doc: Doc) {
-        if (doc.typeDoc != TypeDoc.LOAD) return
-        // Подготовить массив только для одного товара
-        doc.flowLoad()
-    }
-
-    //Печать состава продуктов в подЪезжающем грузовике.
-    fun printLoadProductStorage() {
-        val listProduct = mutableMapOf<Product, Int>()
-        storageProduct.forEach { (t, u) ->
-            if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
-            else listProduct[t] = u
-        }
-        listProduct.forEach { (t, u) -> println("Product: ${t.name}; quantity: $u; total weight:${u * t.weight} ") }
-    }
-
-    fun copyProductToDoc(doc: LoadTruck) {
-        val selectCategory = EnumCategory.values().random()
-        storageProduct.forEach { p, q ->
-            if (p.category == selectCategory) {
-                doc.listProduct[p] = q
-            }
-        }
-    }
 }

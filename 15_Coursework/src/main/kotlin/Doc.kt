@@ -4,15 +4,21 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class Doc(override var bizzy: Boolean, override val typeDoc: TypeDoc, val name: String,
-          override var listProduct: MutableMap<Product, Int>
-):LoadTruck {
+class Doc(
+    override var noBizzy: Boolean,
+    override val typeDoc: TypeDoc,
+    override val name: String,
+    override var listProduct: MutableMap<Product, Int>
+) : LoadTruck {
+    init {
+        noBizzy = false
+    }
 
     fun openChanelUnload(truck: Truck): MutableMap<Product, Int> {
 
         val unLoadProduct = mutableMapOf<Product, Int>()
         if (typeDoc != TypeDoc.UNLOAD) return unLoadProduct
-        bizzy = true
+        noBizzy = true
         runBlocking {
             launch {
                 truck.flowUnload().collect {
@@ -23,11 +29,11 @@ class Doc(override var bizzy: Boolean, override val typeDoc: TypeDoc, val name: 
                 }
             }
         }
-        bizzy = false
+        noBizzy = false
         return unLoadProduct
     }
 
-    fun getStorageProduct(typeProduct:EnumCategory):MutableMap<Product,Int>{
+    fun getStorageProduct(typeProduct: EnumCategory): MutableMap<Product, Int> {
         val loadProduct = mutableMapOf<Product, Int>()
         return loadProduct
     }
@@ -48,16 +54,21 @@ class Doc(override var bizzy: Boolean, override val typeDoc: TypeDoc, val name: 
         }
     }
 
-    override fun loadTruck():Flow<Product> {
-//        val loadProduct = mutableMapOf<Product, Int>()
+    //Загружаем грузовик товаром
+    override fun loadTruck(): Flow<Product> {
+//        val typeProductLoad = EnumTypeProduct.values().random()
+        val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
-            while (listProduct.isNotEmpty()) {
-                listProduct.forEach { (product, q) ->
+            listProduct.takeIf { noBizzy }?.forEach { (product, q) ->
+                if (product.typeProduct == typeProductLoad) {
                     var quantity = q
-                    while (quantity > 0) {
+                    while ((quantity > 0) && noBizzy) {
                         delay(product.timeLoad * 100)
                         emit(product)
+                        if (!noBizzy) break
+                        listProduct[product] = quantity - 1
                         quantity -= 1
+//                            println("${product.name}=${listProduct[product]}, $bizzy; ")
                     }
                 }
             }

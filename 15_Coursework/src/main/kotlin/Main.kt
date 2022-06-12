@@ -1,25 +1,59 @@
-var  assortment = Assortment()
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+var assortment = Assortment()
+
+var numberTruckLoad = 0
+var numberTruckUnload = 0
 
 fun main() {
+    var stepGame = 0
 
-    val storage = Storage(1, 2)
-    for (doc in storage.listUnloadDoc) {
-        if (!doc.bizzy) {
-            val truck = Truck(Tonnage.values().random())
-            truck.fillTruckProducts()
-            truck.printLoadProductTruck()
-            storage.inputProduct(doc.openChanelUnload(truck))
+    val storage = Storage(2, 2)
+
+//    runBlocking {
+//        launch {
+//            val doc = storage.listLoadDocInt[0]
+//            numberTruckLoad++
+//            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+//            truck.loadFromStorageToTruck(doc)
+//        }
+//        launch {
+//            val doc = storage.listLoadDocInt[1]
+//            numberTruckLoad++
+//            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+//            truck.loadFromStorageToTruck(doc)
+//        }
+    while (stepGame < 100) {
+//        for (doc in storage.listUnloadDoc) {
+//            if (!doc.noBizzy) {
+////                val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
+//                val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
+//                truck.fillTruckProducts()
+//                print("To ${doc.name} pulled up ")
+//                truck.printLoadProductTruck()
+//                storage.inputProduct(doc.openChanelUnload(truck))
+////                storage.printLoadProductStorage()
+//                stepGame++
+//            }
+//        }
+        for (doc in storage.listLoadDocInt) {
+            if (!doc.noBizzy) {
+                //           val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
+                numberTruckLoad++
+                val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
+                println("\nTo ${doc.name} pulled up truck ${truck.tonnageTruck}")
+                runBlocking {
+                    launch {
+                        truck.loadFromStorageToTruck(doc)
+                    }
+                }
+                storage.printLoadProductToStorage()
+            }
         }
+        stepGame++
     }
-    for (doc in storage.listLoadDocInt) {
-        if (!doc.bizzy) {
-            val truck = Truck(Tonnage.values().random())
-            storage.copyProductToDoc(doc)
-            truck.openChanelLoad(doc)
-//            storage.outputProduct(doc)
-            truck.printLoadProductTruck()
-        }
-    }
+
     println("############################################################")
-    storage.printLoadProductStorage()
+    storage.printLoadProductToStorage()
 }

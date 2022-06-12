@@ -1,12 +1,12 @@
 class Assortment {
 
     var list = mutableListOf<Product>()
-    var weightTest=200.0
+    var weightTest=500.0
 
     init {
         list.add(
             Product(
-                "Milk",
+                "Food-1",
                 EnumTypeProduct.FOOD,
                 EnumCategory.MilksProducts,
                 1, 2, weightTest
@@ -15,51 +15,89 @@ class Assortment {
 
         list.add(
             Product(
-                "Bred",
+                "Food-2",
                 EnumTypeProduct.FOOD,
-                EnumCategory.Breds, 1, 2, weightTest
+                EnumCategory.MilksProducts, 1, 1, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "Food-3",
+                EnumTypeProduct.FOOD,
+                EnumCategory.Breds, 1, 1, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "Food-4",
+                EnumTypeProduct.FOOD,
+                EnumCategory.Breds, 1, 1, weightTest
             )
         )
 
         list.add(
             Product(
-                "Toaster", EnumTypeProduct.SMALLSIZED,
-                EnumCategory.SmallHousehold, 1, 4, weightTest
+                "SmallSized-1", EnumTypeProduct.SMALLSIZED,
+                EnumCategory.SmallHousehold, 1, 1, weightTest
             )
         )
 
         list.add(
             Product(
-                "Iron", EnumTypeProduct.SMALLSIZED,
-                EnumCategory.SmallHousehold, 1, 5, weightTest
+                "SmallSized-2", EnumTypeProduct.SMALLSIZED,
+                EnumCategory.SmallHousehold, 1, 1, weightTest
             )
         )
 
         list.add(
             Product(
-                "TV", EnumTypeProduct.MEDIUMSIZED,
-                EnumCategory.MediumHousehold, 1, 6, weightTest
+                "MediumSized-1", EnumTypeProduct.MEDIUMSIZED,
+                EnumCategory.MediumHousehold, 1, 1, weightTest
             )
         )
 
         list.add(
             Product(
-                "MicrowaveOven", EnumTypeProduct.MEDIUMSIZED,
-                EnumCategory.MediumHousehold, 1, 2, weightTest
+                "MediumSized-2", EnumTypeProduct.MEDIUMSIZED,
+                EnumCategory.MediumHousehold, 1, 1, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "MediumSized-3", EnumTypeProduct.MEDIUMSIZED,
+                EnumCategory.MediumHousehold, 1, 1, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "MediumSized-4", EnumTypeProduct.MEDIUMSIZED,
+                EnumCategory.MediumHousehold, 1, 1, weightTest
             )
         )
 
         list.add(
             Product(
-                "Fridge", EnumTypeProduct.LARGESIZED,
+                "LargeSized-1", EnumTypeProduct.LARGESIZED,
                 EnumCategory.LargeHousehold, 1, 2, weightTest
             )
         )
 
         list.add(
             Product(
-                "Sofa", EnumTypeProduct.LARGESIZED,
+                "LargeSized-2", EnumTypeProduct.LARGESIZED,
                 EnumCategory.LargeHousehold, 1, 2, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "LargeSized-3", EnumTypeProduct.LARGESIZED,
+                EnumCategory.LargeHousehold, 1, 2, weightTest
+            )
+        )
+        list.add(
+            Product(
+                "LargeSized-4", EnumTypeProduct.LARGESIZED,
+                EnumCategory.LargeHousehold, 1, 1, weightTest
             )
         )
     }
