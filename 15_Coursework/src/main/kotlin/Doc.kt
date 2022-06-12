@@ -3,6 +3,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class Doc(
     override var noBizzy: Boolean,
@@ -33,11 +35,6 @@ class Doc(
         return unLoadProduct
     }
 
-    fun getStorageProduct(typeProduct: EnumCategory): MutableMap<Product, Int> {
-        val loadProduct = mutableMapOf<Product, Int>()
-        return loadProduct
-    }
-
     fun flowLoad(): Flow<Product> {
         val loadProduct = mutableMapOf<Product, Int>()
         return flow {
@@ -53,21 +50,27 @@ class Doc(
             }
         }
     }
+    private val mutex = Mutex()
+    private suspend fun unloadProductFromStorage(product: Product): Boolean {
+        mutex.withLock {
+            if (listProduct[product]!! > 0 && noBizzy) {
+                listProduct[product] = listProduct[product]!! - 1
+                return true
+            } else return false
+        }
+    }
 
     //Загружаем грузовик товаром
     override fun loadTruck(): Flow<Product> {
 //        val typeProductLoad = EnumTypeProduct.values().random()
         val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
-            listProduct.takeIf { noBizzy }?.forEach { (product, q) ->
+            listProduct.takeIf { noBizzy }?.forEach { (product, _) ->
                 if (product.typeProduct == typeProductLoad) {
-                    var quantity = q
-                    while ((quantity > 0) && noBizzy) {
+                    while (unloadProductFromStorage(product) && noBizzy) {
                         delay(product.timeLoad * 100)
                         emit(product)
-                        if (!noBizzy) break
-                        listProduct[product] = quantity - 1
-                        quantity -= 1
+//                        if (!noBizzy) break
 //                            println("${product.name}=${listProduct[product]}, $bizzy; ")
                     }
                 }

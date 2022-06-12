@@ -69,14 +69,14 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
                     if(tonnageTruck.volume >= (currentTonnage + it.weight)){
                         kitProductTruck[it] = quantity + 1
                         currentTonnage += it.weight
-                        print("${doc.name}; $name  ")
+//                        print("${doc.name}; $name  ")
                     }else{
                         doc.noBizzy = false
                     }
                 }
             }
         }
-        print("\nTruck ${tonnageTruck}($currentTonnage) full filling net product:")
+        print("\nTruck ${tonnageTruck}($currentTonnage) full filling next product:")
         kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
         println("")
         doc.noBizzy = false

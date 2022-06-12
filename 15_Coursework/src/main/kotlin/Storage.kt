@@ -1,3 +1,7 @@
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import org.w3c.dom.Element
+
 class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
@@ -34,9 +38,9 @@ class Storage(
         var currentTypeProduct = EnumTypeProduct.FOOD
         println("\nState Storage:")
         storageProduct.forEach { (p, q) ->
-            if (currentTypeProduct == p.typeProduct){
+            if (currentTypeProduct == p.typeProduct) {
                 print("${p.name}: $q; ")
-            }else{
+            } else {
                 currentTypeProduct = p.typeProduct
                 print("\n${currentTypeProduct}: ${p.name}: $q; ")
             }

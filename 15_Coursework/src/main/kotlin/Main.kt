@@ -9,22 +9,28 @@ var numberTruckUnload = 0
 fun main() {
     var stepGame = 0
 
-    val storage = Storage(2, 2)
+    val storage = Storage(2, 3)
 
-//    runBlocking {
-//        launch {
-//            val doc = storage.listLoadDocInt[0]
-//            numberTruckLoad++
-//            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-//            truck.loadFromStorageToTruck(doc)
-//        }
-//        launch {
-//            val doc = storage.listLoadDocInt[1]
-//            numberTruckLoad++
-//            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-//            truck.loadFromStorageToTruck(doc)
-//        }
-    while (stepGame < 100) {
+    runBlocking {
+        launch {
+            val doc = storage.listLoadDocInt[0]
+            numberTruckLoad++
+            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+            truck.loadFromStorageToTruck(doc)
+        }
+        launch {
+            val doc = storage.listLoadDocInt[1]
+            numberTruckLoad++
+            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+            truck.loadFromStorageToTruck(doc)
+        }
+        launch {
+            val doc = storage.listLoadDocInt[2]
+            numberTruckLoad++
+            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+            truck.loadFromStorageToTruck(doc)
+        }
+//    while (stepGame < 100) {
 //        for (doc in storage.listUnloadDoc) {
 //            if (!doc.noBizzy) {
 ////                val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
@@ -37,21 +43,22 @@ fun main() {
 //                stepGame++
 //            }
 //        }
-        for (doc in storage.listLoadDocInt) {
-            if (!doc.noBizzy) {
-                //           val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
-                numberTruckLoad++
-                val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
-                println("\nTo ${doc.name} pulled up truck ${truck.tonnageTruck}")
-                runBlocking {
-                    launch {
-                        truck.loadFromStorageToTruck(doc)
-                    }
-                }
-                storage.printLoadProductToStorage()
-            }
-        }
-        stepGame++
+
+//        for (doc in storage.listLoadDocInt) {
+//            if (!doc.noBizzy) {
+//                //           val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
+//                runBlocking {
+//                    launch {
+//                        numberTruckLoad++
+//                        val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
+//                        println("\nTo ${doc.name} pulled up truck ${truck.tonnageTruck}")
+//                        truck.loadFromStorageToTruck(doc)
+//                    }
+//                }
+//                storage.printLoadProductToStorage()
+//            }
+//        }
+//        stepGame++
     }
 
     println("############################################################")
