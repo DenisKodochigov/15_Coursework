@@ -6,9 +6,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class Doc(
+class Port(
     override var noBizzy: Boolean,
-    override val typeDoc: TypeDoc,
+    override val typePort: TypePort,
     override val name: String,
     override var listProduct: MutableMap<Product, Int>
 ) : LoadTruck {
@@ -19,7 +19,7 @@ class Doc(
     fun openChanelUnload(truck: Truck): MutableMap<Product, Int> {
 
         val unLoadProduct = mutableMapOf<Product, Int>()
-        if (typeDoc != TypeDoc.UNLOAD) return unLoadProduct
+        if (typePort != TypePort.UNLOAD) return unLoadProduct
         noBizzy = true
         runBlocking {
             launch {
@@ -50,9 +50,11 @@ class Doc(
             }
         }
     }
+
     private val mutex = Mutex()
     private suspend fun unloadProductFromStorage(product: Product): Boolean {
         mutex.withLock {
+//            print("p=${listProduct[product]};")
             if (listProduct[product]!! > 0 && noBizzy) {
                 listProduct[product] = listProduct[product]!! - 1
                 return true
@@ -65,13 +67,17 @@ class Doc(
 //        val typeProductLoad = EnumTypeProduct.values().random()
         val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
-            listProduct.takeIf { noBizzy }?.forEach { (product, _) ->
-                if (product.typeProduct == typeProductLoad) {
-                    while (unloadProductFromStorage(product) && noBizzy) {
-                        delay(product.timeLoad * 100)
-                        emit(product)
+            while (noBizzy) { //Крутит пока не загрузит весь грузовик
+                listProduct.takeIf { noBizzy }?.forEach { (product, q) ->
+                    if (product.typeProduct == typeProductLoad) {
+                        while ((listProduct[product]!! > 0) && noBizzy) {
+                            delay(product.timeLoad * 100)
+                            emit(product)
+                            unloadProductFromStorage(product)
+//                        print("q=${listProduct[product]}; ")
 //                        if (!noBizzy) break
 //                            println("${product.name}=${listProduct[product]}, $bizzy; ")
+                        }
                     }
                 }
             }

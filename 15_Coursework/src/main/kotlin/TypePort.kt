@@ -1,4 +1,4 @@
-enum class TypeDoc {
+enum class TypePort {
     UNLOAD,
     LOAD
 }

@@ -10,25 +10,26 @@ fun main() {
     var stepGame = 0
 
     val storage = Storage(2, 3)
-
-    runBlocking {
-        launch {
-            val doc = storage.listLoadDocInt[0]
-            numberTruckLoad++
-            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-            truck.loadFromStorageToTruck(doc)
-        }
-        launch {
-            val doc = storage.listLoadDocInt[1]
-            numberTruckLoad++
-            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-            truck.loadFromStorageToTruck(doc)
-        }
-        launch {
-            val doc = storage.listLoadDocInt[2]
-            numberTruckLoad++
-            val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-            truck.loadFromStorageToTruck(doc)
+    while (true) {
+        runBlocking {
+            launch {
+                val port = storage.listLoadDocInt[0]
+                numberTruckLoad++
+                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+                truck.loadFromStorageToTruck(port)
+            }
+            launch {
+                val doc = storage.listLoadDocInt[1]
+                numberTruckLoad++
+                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+                truck.loadFromStorageToTruck(doc)
+            }
+            launch {
+                val doc = storage.listLoadDocInt[2]
+                numberTruckLoad++
+                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
+                truck.loadFromStorageToTruck(doc)
+            }
         }
 //    while (stepGame < 100) {
 //        for (doc in storage.listUnloadDoc) {

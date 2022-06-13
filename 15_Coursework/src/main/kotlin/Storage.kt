@@ -1,14 +1,10 @@
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import org.w3c.dom.Element
-
 class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
 ) {
     private var storageProduct = mutableMapOf<Product, Int>()
-    var listUnloadDoc = mutableListOf<Doc>()
-    var listLoadDoc = mutableListOf<Doc>()
+    var listUnloadPort = mutableListOf<Port>()
+    var listLoadPort = mutableListOf<Port>()
     var listLoadDocInt = mutableListOf<LoadTruck>()
 
     init {
@@ -16,15 +12,15 @@ class Storage(
         assortment.list.forEach { storageProduct[it] = 50 }
 
         for (i in 1..numberUnloadDock) {
-            val doc = Doc(false, TypeDoc.UNLOAD, "Doc-${TypeDoc.UNLOAD}_N:$i", storageProduct)
-            listUnloadDoc.add(doc)
-            println("Create Doc-${TypeDoc.UNLOAD}_N:$i")
+            val port = Port(false, TypePort.UNLOAD, "Doc-${TypePort.UNLOAD}_N:$i", storageProduct)
+            listUnloadPort.add(port)
+            println("Create Doc-${TypePort.UNLOAD}_N:$i")
         }
         for (i in 1..numberLoadDock) {
-            val doc = Doc(false, TypeDoc.LOAD, "Doc-${TypeDoc.LOAD}_N:$i", storageProduct)
-            listLoadDoc.add(doc)
-            listLoadDocInt.add(doc)
-            println("Create Doc-${TypeDoc.LOAD}_N:$i")
+            val port = Port(false, TypePort.LOAD, "Doc-${TypePort.LOAD}_N:$i", storageProduct)
+            listLoadPort.add(port)
+            listLoadDocInt.add(port)
+            println("Create Doc-${TypePort.LOAD}_N:$i")
         }
     }
 
@@ -48,10 +44,10 @@ class Storage(
         println("")
     }
 
-    fun outputProduct(doc: Doc) {
-        if (doc.typeDoc != TypeDoc.LOAD) return
+    fun outputProduct(port: Port) {
+        if (port.typePort != TypePort.LOAD) return
         // Подготовить массив только для одного товара
-        doc.flowLoad()
+        port.flowLoad()
     }
 
     fun inputProduct(listProduct: MutableMap<Product, Int>) {

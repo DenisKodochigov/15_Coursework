@@ -57,13 +57,13 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
         }
     }
     //Принимаем товар со склада и загружаем в грузовик
-    fun loadFromStorageToTruck(doc: LoadTruck){
+    fun loadFromStorageToTruck(port: LoadTruck){
         var nT = name
-        if (doc.typeDoc != TypeDoc.LOAD) return
-        doc.noBizzy = true
+        if (port.typePort != TypePort.LOAD) return
+        port.noBizzy = true
         runBlocking {
             launch {
-                doc.loadTruck().collect {
+                port.loadTruck().collect {
                     var quantity = kitProductTruck[it]
                     if (quantity == null) quantity = 0
                     if(tonnageTruck.volume >= (currentTonnage + it.weight)){
@@ -71,7 +71,7 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
                         currentTonnage += it.weight
 //                        print("${doc.name}; $name  ")
                     }else{
-                        doc.noBizzy = false
+                        port.noBizzy = false
                     }
                 }
             }
@@ -79,6 +79,6 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
         print("\nTruck ${tonnageTruck}($currentTonnage) full filling next product:")
         kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
         println("")
-        doc.noBizzy = false
+        port.noBizzy = false
     }
 }
