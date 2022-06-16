@@ -9,10 +9,10 @@ class Assortment {
     private val timeUnloadMS = 120.toLong()
     private val timeUnloadSS = 100.toLong()
     private val timeUnloadF = 80.toLong()
-    private val timeLoadLS = 220.toLong()
-    private val timeLoadMS = 140.toLong()
-    private val timeLoadSS = 120.toLong()
-    private val timeloadF = 100.toLong()
+    private val timeLoadLS = 200.toLong()
+    private val timeLoadMS = 120.toLong()
+    private val timeLoadSS = 100.toLong()
+    private val timeloadF = 80.toLong()
 
     init {
         list.add(

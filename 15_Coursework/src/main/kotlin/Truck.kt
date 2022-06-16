@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.Date
 
 class Truck(typeTonnage: TypeTonnage, private var name: String) {
     private var tonnageTruck = selectTonnage(typeTonnage)
@@ -57,7 +58,7 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
             if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
             else listProduct[t] = u
         }
-        listProduct.forEach { (t, u) -> print("${t.name}=$u; weight:${u * t.weight} ;") }
+        listProduct.forEach { (t, u) -> print("port.printLoadProductTruck ${t.name}=$u; weight:${u * t.weight} ;") }
         println("")
     }
 
@@ -72,20 +73,21 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
                         if (tonnageTruck.volume >= (currentTonnage + it.weight)) { //Проверяю поместиться ли он в машине
                             kitProductTruck[it] = quantity + 1
                             currentTonnage += it.weight
-//                          print("${port.name}, $name; ")
+//                            println("$name loading ${it.name}, current tonnage: $currentTonnage")
+//                            print("${port.name}, $name; ")
                         } else {
-                            println("No product !!!!")
-//                            cancel()
+                            print("${Date()}: $name ${tonnageTruck}($currentTonnage) full filling next product:")
+                            kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
+                            println("")
+                            port.noBusy = false
+                            cancel()
                         }
-//                        print("$metka ")
+                    } else {
+//                        println("For $name(${tonnageTruck.volume}) no product !!!! Truck load on $currentTonnage")
                     }
                 }
             }
         }
-        print("$name ${tonnageTruck}($currentTonnage) full filling next product:")
-        kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
-        println("")
-        port.noBusy = false
     }
 
     //Разгружаем грузовик
@@ -99,7 +101,7 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
                     emit(product)
                     quantity -= 1
                 }
-//                println("From $name to storage moving: ${product.name}=${kitProductTruck[product]}")
+                println("${Date()}: From $name($currentTonnage) to storage moving: ${product.name}=${kitProductTruck[product]}")
                 kitProductTruck.remove(product)
             }
         }

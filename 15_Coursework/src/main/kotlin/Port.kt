@@ -16,8 +16,8 @@ class Port(
 
     //Загружаем грузовик товаром
     override suspend fun loadTruck(metka:String): Flow<Product?> {
-//        val typeProductLoad = EnumTypeProduct.values().random()
-        val typeProductLoad = EnumTypeProduct.LARGESIZED
+        val typeProductLoad = EnumTypeProduct.values().random()
+//        val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
             while (noBusy) { //Крутит пока не загрузит весь грузовик
                 val movingProduct = storage.getProduct(typeProductLoad)
@@ -29,8 +29,8 @@ class Port(
 //                    println("${movingProduct.name}=${storage.getQuantity(movingProduct)}, $noBusy; ")
                 } else {
                     emit(null)
-//                    println(" No product $typeProductLoad")
-                    delay(100) // ждем когда товар поступит на склад
+//                    println("port.loadTruck  No product $typeProductLoad")
+                    delay(1000) // ждем когда товар поступит на склад
                 }
             }
         }
