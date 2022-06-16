@@ -1,67 +1,61 @@
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 var assortment = Assortment()
 
-var numberTruckLoad = 0
-var numberTruckUnload = 0
-
 fun main() {
     var stepGame = 0
+    var numberTruckLoad = 0
+    var numberTruckUnload = 0
 
-    val storage = Storage(2, 3)
+    val storage = Storage(3, 3)
     while (true) {
         runBlocking {
-            launch {
-                val port = storage.listLoadDocInt[0]
-                numberTruckLoad++
-                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-                truck.loadFromStorageToTruck(port)
-            }
-            launch {
-                val doc = storage.listLoadDocInt[1]
-                numberTruckLoad++
-                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-                truck.loadFromStorageToTruck(doc)
-            }
-            launch {
-                val doc = storage.listLoadDocInt[2]
-                numberTruckLoad++
-                val truck = Truck(Tonnage.values().random(), "Truck-$numberTruckLoad")
-                truck.loadFromStorageToTruck(doc)
+            //Unload truck
+            while (true) {
+                launch { loadPort(storage, numberTruckLoad++, 0) }
+                launch { loadPort(storage, numberTruckLoad++, 1) }
+                launch { loadPort(storage, numberTruckLoad++, 2) }
+
+                //Load truck
+                launch { unloadPort(storage, numberTruckUnload++, 0) }
+                launch { unloadPort(storage, numberTruckUnload++, 1) }
+                launch { unloadPort(storage, numberTruckUnload++, 2) }
+                stepGame++
+                delay(1000)
+//                println("Step game: $stepGame Unload port: ${storage.listUnloadPort[0].noBusy}, load port: ${storage.listLoadPort[0].noBusy}")
             }
         }
-//    while (stepGame < 100) {
-//        for (doc in storage.listUnloadDoc) {
-//            if (!doc.noBizzy) {
-////                val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
-//                val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
-//                truck.fillTruckProducts()
-//                print("To ${doc.name} pulled up ")
-//                truck.printLoadProductTruck()
-//                storage.inputProduct(doc.openChanelUnload(truck))
-////                storage.printLoadProductStorage()
-//                stepGame++
-//            }
-//        }
-
-//        for (doc in storage.listLoadDocInt) {
-//            if (!doc.noBizzy) {
-//                //           val truck = Truck(Tonnage.values().random(),"Truck-$numberTruckLoad")
-//                runBlocking {
-//                    launch {
-//                        numberTruckLoad++
-//                        val truck = Truck(Tonnage.SMALL, "Truck-$numberTruckLoad")
-//                        println("\nTo ${doc.name} pulled up truck ${truck.tonnageTruck}")
-//                        truck.loadFromStorageToTruck(doc)
-//                    }
-//                }
-//                storage.printLoadProductToStorage()
-//            }
-//        }
-//        stepGame++
     }
 
-    println("############################################################")
-    storage.printLoadProductToStorage()
+//    println("############################################################")
+//    storage.printLoadProductToStorage()
+}
+
+// Программа для перевалки товара из грузовика на склад
+suspend fun loadPort(storage: Storage, numberTruckUnload: Int, numberPort: Int) {
+    val port = storage.listUnloadPort[numberPort]
+    if (!port.noBusy) {
+        val truck = Truck(TypeTonnage.ALL, "Truck-$numberTruckUnload")
+        truck.fillTruckProducts()
+//        truck.printLoadProductTruck(port as Port)
+        port.unloadTruck(truck, "U$numberPort")
+//        storage.printLoadProductToStorage()
+    } else {
+//        println("${port.name} Busy")
+    }
+}
+
+// Программа для перевалки товара со склада в грузовик
+suspend fun unloadPort(storage: Storage, numberTruckLoad: Int, numberPort: Int) {
+    val port = storage.listLoadPort[numberPort]
+    if (!port.noBusy) {
+        val truck = Truck(TypeTonnage.FOROUT, "Truck-$numberTruckLoad")
+        truck.printLoadProductTruck(port as Port)
+        truck.loadFromStorageToTruck(port, "L$numberPort")
+        storage.printLoadProductToStorage()
+    } else {
+//        println("${port.name} Busy")
+    }
 }

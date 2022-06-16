@@ -1,23 +1,44 @@
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class Truck(var tonnageTruck: Tonnage, var name:String) {
-    var currentTonnage = 0.0
-    var kitProductTruck = mutableMapOf<Product, Int>()
+class Truck(typeTonnage: TypeTonnage, private var name: String) {
+    private var tonnageTruck = selectTonnage(typeTonnage)
+    private var currentTonnage = 0.0
+    private var kitProductTruck = mutableMapOf<Product, Int>()
+
+    //В зависимости от типа тонажа возвращается случайный тонаж из представленных в перечислении
+    // или случайный тонаж из двух наименьших по грузоподъемности
+    private fun selectTonnage(typeTonnage: TypeTonnage): Tonnage {
+
+        val listSmallerTonnage = mutableListOf(Tonnage.LARGE, Tonnage.LARGE)
+//        return Tonnage.SMALL
+        return if (typeTonnage == TypeTonnage.FOROUT) {
+            Tonnage.values().forEach {
+                if (listSmallerTonnage[0].volume > it.volume) listSmallerTonnage[0] = it
+                if (listSmallerTonnage[0].volume != it.volume) {
+                    if (listSmallerTonnage[1].volume > it.volume) listSmallerTonnage[1] = it
+                }
+            }
+            listSmallerTonnage.random()
+        } else {
+            Tonnage.values().random()
+        }
+    }
 
     //Заполнение грузовика товарами
     fun fillTruckProducts() {
-//        val assortment = Assortment()
+
         var typeProductFOOD = false  //Переменная - грузовик с пищевыми продуктами или с промышленными.
         if (EnumTypeProduct.values().random() == EnumTypeProduct.FOOD) typeProductFOOD = true
 
         while (true) {
             val product = assortment.list.random()
             if (tonnageTruck.volume < product.weight.toInt()) continue
-            val quantity = (1..(tonnageTruck.volume / product.weight.toInt())).random()
+            val quantity = (1..(tonnageTruck.volume / product.weight).toInt()).random()
             if (tonnageTruck.volume <= (currentTonnage + product.weight * quantity)) break //Проверка массы товара с грузоподъемностью.
             if (!((product.typeProduct == EnumTypeProduct.FOOD) xor typeProductFOOD)) { //Фильтрация по категориям товара
                 if (kitProductTruck[product] != null) {
@@ -29,8 +50,8 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
     }
 
     //Печать состава продуктов в подЪезжающем грузовике.
-    fun printLoadProductTruck() {
-        print("Content truck load next product: ")
+    fun printLoadProductTruck(port: Port) {
+        print("The ${port.name} have truck ${name}, include product: ")
         val listProduct = mutableMapOf<Product, Int>()
         kitProductTruck.forEach { (t, u) ->
             if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
@@ -40,45 +61,47 @@ class Truck(var tonnageTruck: Tonnage, var name:String) {
         println("")
     }
 
-    fun flowUnload(): Flow<Product> {
+    //Загружаем в грузовик
+    suspend fun loadFromStorageToTruck(port: MoveProduct, metka: String) {
+        port.noBusy = true
+        runBlocking {
+            launch {
+                port.loadTruck(metka).collect {
+                    if (it != null) {
+                        val quantity = kitProductTruck[it] ?: 0  //определяю количество в машине полученного товара
+                        if (tonnageTruck.volume >= (currentTonnage + it.weight)) { //Проверяю поместиться ли он в машине
+                            kitProductTruck[it] = quantity + 1
+                            currentTonnage += it.weight
+//                          print("${port.name}, $name; ")
+                        } else {
+                            println("No product !!!!")
+//                            cancel()
+                        }
+//                        print("$metka ")
+                    }
+                }
+            }
+        }
+        print("$name ${tonnageTruck}($currentTonnage) full filling next product:")
+        kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
+        println("")
+        port.noBusy = false
+    }
+
+    //Разгружаем грузовик
+    suspend fun unloadFromTruckToStorage(metka: String): Flow<Product> {
         return flow {
             while (kitProductTruck.isNotEmpty()) {
                 val product: Product = kitProductTruck.firstNotNullOf { (p, _) -> p }
-                var quantity = kitProductTruck[product]
-                if (quantity != null) {
-                    while (quantity > 0) {
-                        delay(product.timeUnload * 10)
-                        emit(product)
-                        quantity -= 1
-                    }
+                var quantity = kitProductTruck[product] ?: 0
+                while (quantity > 0) {
+                    delay(product.timeUnload)
+                    emit(product)
+                    quantity -= 1
                 }
+//                println("From $name to storage moving: ${product.name}=${kitProductTruck[product]}")
                 kitProductTruck.remove(product)
             }
         }
-    }
-    //Принимаем товар со склада и загружаем в грузовик
-    fun loadFromStorageToTruck(port: LoadTruck){
-        var nT = name
-        if (port.typePort != TypePort.LOAD) return
-        port.noBizzy = true
-        runBlocking {
-            launch {
-                port.loadTruck().collect {
-                    var quantity = kitProductTruck[it]
-                    if (quantity == null) quantity = 0
-                    if(tonnageTruck.volume >= (currentTonnage + it.weight)){
-                        kitProductTruck[it] = quantity + 1
-                        currentTonnage += it.weight
-//                        print("${doc.name}; $name  ")
-                    }else{
-                        port.noBizzy = false
-                    }
-                }
-            }
-        }
-        print("\nTruck ${tonnageTruck}($currentTonnage) full filling next product:")
-        kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
-        println("")
-        port.noBizzy = false
     }
 }

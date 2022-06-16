@@ -1,6 +1,6 @@
 enum class EnumCategory {
     MilksProducts,
-    Breds,
+    Breads,
     SmallHousehold,
     MediumHousehold,
     LargeHousehold

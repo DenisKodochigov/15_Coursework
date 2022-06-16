@@ -1,60 +1,79 @@
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
 class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
-) {
+) : MovingInsideWarehouse {
     private var storageProduct = mutableMapOf<Product, Int>()
-    var listUnloadPort = mutableListOf<Port>()
-    var listLoadPort = mutableListOf<Port>()
-    var listLoadDocInt = mutableListOf<LoadTruck>()
+    var listUnloadPort = mutableListOf<MoveProduct>()
+    var listLoadPort = mutableListOf<MoveProduct>()
+    private val mutexGet = Mutex()
+    private val mutexSet = Mutex()
+    private val mutexRem = Mutex()
 
     init {
 //        Создал пустой склад со всей ожидаемой номеклатурой
-        assortment.list.forEach { storageProduct[it] = 50 }
+        assortment.list.forEach { storageProduct[it] = 0 }
 
         for (i in 1..numberUnloadDock) {
-            val port = Port(false, TypePort.UNLOAD, "Doc-${TypePort.UNLOAD}_N:$i", storageProduct)
+            val port = Port(false, "PORT-UNLOAD_N$i", this)
             listUnloadPort.add(port)
-            println("Create Doc-${TypePort.UNLOAD}_N:$i")
+//            println("Create Doc-UNLOAD_N$i")
         }
         for (i in 1..numberLoadDock) {
-            val port = Port(false, TypePort.LOAD, "Doc-${TypePort.LOAD}_N:$i", storageProduct)
+            val port = Port(false, "PORT-LOAD_N$i", this)
             listLoadPort.add(port)
-            listLoadDocInt.add(port)
-            println("Create Doc-${TypePort.LOAD}_N:$i")
+//            println("Create Doc-LOAD_N$i")
         }
     }
 
     //Печать состава продуктов в подЪезжающем грузовике.
     fun printLoadProductToStorage() {
-        val rollListProduct = mutableMapOf<Product, Int>()
-//        storageProduct.forEach { (t, u) ->
-//            if (rollListProduct[t] != null) rollListProduct[t] = rollListProduct[t]!! + u
-//            else rollListProduct[t] = u
-//        }
-        var currentTypeProduct = EnumTypeProduct.FOOD
-        println("\nState Storage:")
+        var currentTypeProduct = EnumTypeProduct.LARGESIZED
+        print("\nState Storage:")
         storageProduct.forEach { (p, q) ->
             if (currentTypeProduct == p.typeProduct) {
-                print("${p.name}: $q; ")
+                print("${p.name.padStart(13, ' ')}=${q.toString().padEnd(3,' ')}; ")
             } else {
                 currentTypeProduct = p.typeProduct
-                print("\n${currentTypeProduct}: ${p.name}: $q; ")
+                print("\n${currentTypeProduct.toString().padEnd(12,' ')}:${p.name.padStart(15, ' ')}=${q.toString().padEnd(3,' ')}; ")
             }
         }
-        println("")
+        println("\n")
     }
 
-    fun outputProduct(port: Port) {
-        if (port.typePort != TypePort.LOAD) return
-        // Подготовить массив только для одного товара
-        port.flowLoad()
+    @Synchronized
+    override fun setProduct(product: Product) {
+//        mutexSet.withLock {
+            if (storageProduct[product]!! > 0) {
+                storageProduct[product] = storageProduct[product]!! + 1
+            } else {
+                storageProduct[product] = 1
+            }
+//        }
     }
-
-    fun inputProduct(listProduct: MutableMap<Product, Int>) {
-        listProduct.forEach { (t, q) ->
-            if (storageProduct[t] == null) storageProduct[t] = q
-            else storageProduct[t] = storageProduct[t]!! + q
-        }
+    @Synchronized
+    override fun getProduct(typeProductLoad: EnumTypeProduct): Product? {
+//        mutexGet.withLock {
+            storageProduct.forEach { (product, _) -> //Делаем прерываение по циклу, если грузовик загружен
+                if (product.typeProduct == typeProductLoad) {         //Згружаме только опеределенный тип товара
+                    if (storageProduct[product]!! > 0) {
+                        return product
+                    }
+                }
+            }
+//        }
+        return null
     }
-
+    @Synchronized
+    override fun removeProduct(product: Product) {
+//        mutexRem.withLock {
+            if (storageProduct[product]!! > 0) {
+                storageProduct[product] = storageProduct[product]!! - 1
+            }
+//        }
+    }
+    @Synchronized
+    override fun getQuantity(product: Product): Int = storageProduct[product]!!
 }
