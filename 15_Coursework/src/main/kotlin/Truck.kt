@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Date
 
-class Truck(typeTonnage: TypeTonnage, private var name: String) {
+class Truck(typeTonnage: TypeTonnage, var name: String) {
     private var tonnageTruck = selectTonnage(typeTonnage)
     private var currentTonnage = 0.0
     private var kitProductTruck = mutableMapOf<Product, Int>()
@@ -16,7 +16,7 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
     private fun selectTonnage(typeTonnage: TypeTonnage): Tonnage {
 
         val listSmallerTonnage = mutableListOf(Tonnage.LARGE, Tonnage.LARGE)
-//        return Tonnage.SMALL
+
         return if (typeTonnage == TypeTonnage.FOROUT) {
             Tonnage.values().forEach {
                 if (listSmallerTonnage[0].volume > it.volume) listSmallerTonnage[0] = it
@@ -30,14 +30,14 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
         }
     }
 
-    //Заполнение грузовика товарами
+    //Заполнение грузовика товарами перед тем как встать в очередь на разгрузку
     fun fillTruckProducts() {
 
         var typeProductFOOD = false  //Переменная - грузовик с пищевыми продуктами или с промышленными.
         if (EnumTypeProduct.values().random() == EnumTypeProduct.FOOD) typeProductFOOD = true
 
         while (true) {
-            val product = assortment.list.random()
+            val product = Nomenclature.list.random()
             if (tonnageTruck.volume < product.weight.toInt()) continue
             val quantity = (1..(tonnageTruck.volume / product.weight).toInt()).random()
             if (tonnageTruck.volume <= (currentTonnage + product.weight * quantity)) break //Проверка массы товара с грузоподъемностью.
@@ -63,27 +63,23 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
     }
 
     //Загружаем в грузовик
-    suspend fun loadFromStorageToTruck(port: MoveProduct, metka: String) {
+    suspend fun loadFromStorageToTruck(port: MoveProduct) {
         port.noBusy = true
         runBlocking {
             launch {
-                port.loadTruck(metka).collect {
+                port.loadTruck().collect {
                     if (it != null) {
                         val quantity = kitProductTruck[it] ?: 0  //определяю количество в машине полученного товара
                         if (tonnageTruck.volume >= (currentTonnage + it.weight)) { //Проверяю поместиться ли он в машине
                             kitProductTruck[it] = quantity + 1
                             currentTonnage += it.weight
-//                            println("$name loading ${it.name}, current tonnage: $currentTonnage")
-//                            print("${port.name}, $name; ")
                         } else {
-                            print("${Date()}: $name ${tonnageTruck}($currentTonnage) full filling next product:")
-                            kitProductTruck.forEach { (p, q) -> print("${p.name}:$q; ") }
-                            println("")
                             port.noBusy = false
                             cancel()
                         }
                     } else {
-//                        println("For $name(${tonnageTruck.volume}) no product !!!! Truck load on $currentTonnage")
+                        //Итоговое сообщение после загрузки грузовика.
+                        println("For $name(${tonnageTruck.volume}) no product !!!! Truck load on $currentTonnage")
                     }
                 }
             }
@@ -91,7 +87,7 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
     }
 
     //Разгружаем грузовик
-    suspend fun unloadFromTruckToStorage(metka: String): Flow<Product> {
+    suspend fun unloadFromTruckToStorage(): Flow<Product> {
         return flow {
             while (kitProductTruck.isNotEmpty()) {
                 val product: Product = kitProductTruck.firstNotNullOf { (p, _) -> p }
@@ -101,6 +97,7 @@ class Truck(typeTonnage: TypeTonnage, private var name: String) {
                     emit(product)
                     quantity -= 1
                 }
+                //Собщение выводиться при разагрузке одного типа товара с грузовика.
                 println("${Date()}: From $name($currentTonnage) to storage moving: ${product.name}=${kitProductTruck[product]}")
                 kitProductTruck.remove(product)
             }

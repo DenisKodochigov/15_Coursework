@@ -1,50 +1,46 @@
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-var assortment = Assortment()
-var numberTruckLoad = 0
-var numberTruckUnload = 0
+
+var numberTruck = NumberTruck(0, 0)
 
 fun main() {
-    var stepGame = 0
-
     val storage = Storage(3, 3)
-    while (true) {
-        runBlocking {
-            while (true) {
-                //Unload truck
-                launch { loadPort(storage, 0) }
-//                launch { loadPort(storage, 1) }
-//                launch { loadPort(storage, 2) }
 
-                //Load truck
-                launch { unloadPort(storage, 0) }
-//                launch { unloadPort(storage, 1) }
-//                launch { unloadPort(storage, 2) }
-                stepGame++
-                delay(1000)
-//                println("Step game: $stepGame Unload port: ${storage.listUnloadPort[0].noBusy}, load port: ${storage.listLoadPort[0].noBusy}")
-            }
+    runBlocking {
+        val queueTruck = Channel<Truck>(3)
+        while (true) {
+            //Unload truck
+            launch { loadPort(storage, queueTruck, 0) }
+            launch { loadPort(storage, queueTruck, 1) }
+            launch { loadPort(storage, queueTruck, 2) }
+
+            //Load truck
+            launch { unloadPort(storage, 0) }
+            launch { unloadPort(storage, 1) }
+            launch { unloadPort(storage, 2) }
+
+            delay(1000)
+            val truck = Truck(TypeTonnage.ALL, "Truck-${numberTruck.load}")
+            truck.fillTruckProducts()
+            println("send ${truck.name}")
+            queueTruck.send(truck)
+            numberTruck.load++
         }
     }
-
-//    println("############################################################")
-//    storage.printLoadProductToStorage()
 }
 
 // Программа для перевалки товара из грузовика на склад
-suspend fun loadPort(storage: Storage, numberPort: Int) {
+suspend fun loadPort(storage: Storage, queueTruck: Channel<Truck>, numberPort: Int) {
     val port = storage.listUnloadPort[numberPort]
     if (!port.noBusy) {
-        numberTruckLoad++
-        val truck = Truck(TypeTonnage.ALL, "Truck-$numberTruckLoad")
-        truck.fillTruckProducts()
-//        truck.printLoadProductTruck(port as Port)
-        port.unloadTruck(truck, "U$numberPort")
-        storage.printLoadProductToStorage()
-    } else {
-//        println("${port.name} Busy")
+        for (truck in queueTruck) {
+            println("Receive truck ${truck.name}, port=$numberPort, busy port=${port.noBusy}")
+            port.unloadTruck(truck)
+            storage.printLoadProductToStorage()
+        }
     }
 }
 
@@ -52,13 +48,9 @@ suspend fun loadPort(storage: Storage, numberPort: Int) {
 suspend fun unloadPort(storage: Storage, numberPort: Int) {
     val port = storage.listLoadPort[numberPort]
     if (!port.noBusy) {
-        numberTruckUnload++
-        val truck = Truck(TypeTonnage.FOROUT, "Truck-$numberTruckUnload")
-//        truck.printLoadProductTruck(port as Port)
-        truck.loadFromStorageToTruck(port, "L$numberPort")
+        numberTruck.unload++
+        val truck = Truck(TypeTonnage.FOROUT, "Truck-${numberTruck.unload}")
+        truck.loadFromStorageToTruck(port)
 //        storage.printLoadProductToStorage()
-    } else {
-//        println("${port.name} Busy")
     }
-
 }

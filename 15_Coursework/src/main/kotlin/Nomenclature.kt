@@ -1,18 +1,18 @@
-class Assortment {
+object Nomenclature {
 
     var list = mutableListOf<Product>()
-    private val weightLS = 550.0
-    private val weightMS = 300.0
-    private val weightSS = 100.0
-    private val weightF = 50.0
-    private val timeUnloadLS = 200.toLong()
-    private val timeUnloadMS = 120.toLong()
-    private val timeUnloadSS = 100.toLong()
-    private val timeUnloadF = 80.toLong()
-    private val timeLoadLS = 200.toLong()
-    private val timeLoadMS = 120.toLong()
-    private val timeLoadSS = 100.toLong()
-    private val timeloadF = 80.toLong()
+    private const val weightLS = 550.0
+    private const val weightMS = 300.0
+    private const val weightSS = 100.0
+    private const val weightF = 50.0
+    private const val timeUnloadLS = 200.toLong()
+    private const val timeUnloadMS = 120.toLong()
+    private const val timeUnloadSS = 100.toLong()
+    private const val timeUnloadF = 80.toLong()
+    private const val timeLoadLS = 200.toLong()
+    private const val timeLoadMS = 120.toLong()
+    private const val timeLoadSS = 100.toLong()
+    private const val timeloadF = 80.toLong()
 
     init {
         list.add(

@@ -15,7 +15,7 @@ class Port(
     }
 
     //Загружаем грузовик товаром
-    override suspend fun loadTruck(metka:String): Flow<Product?> {
+    override suspend fun loadTruck(): Flow<Product?> {
         val typeProductLoad = EnumTypeProduct.values().random()
 //        val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
@@ -37,11 +37,11 @@ class Port(
     }
 
     //Разгружаем грузовик
-    override suspend fun unloadTruck(truck: Truck, metka: String) {
+    override suspend fun unloadTruck(truck: Truck) {
         noBusy = true
         runBlocking {
             launch {
-                truck.unloadFromTruckToStorage(metka).collect {
+                truck.unloadFromTruckToStorage().collect {
                     storage.setProduct(it)
 //                  println("Moving to storage product: ${it.name}= ${storage.getQuantity(it)}")
                 }
