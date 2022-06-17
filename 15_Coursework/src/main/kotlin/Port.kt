@@ -6,13 +6,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class Port(
-    override var noBusy: Boolean,
+    var noBusy: Boolean,
     override val name: String,
     private var storage: MovingInsideWarehouse
 ) : MoveProduct {
-    init {
-        noBusy = false
-    }
 
     //Загружаем грузовик товаром
     override suspend fun loadTruck(): Flow<Product?> {
@@ -25,9 +22,9 @@ class Port(
                     delay(movingProduct.timeLoad)
                     storage.removeProduct(movingProduct)
                 } else {
-                    println("$name not product !!! $typeProductLoad  number truck ${numberTruck.unload}")
+//                    println("$name not product !!! $typeProductLoad  number truck ${numberTruck.unload}")
                     emit(null)
-                    delay(10000) // ждем когда товар поступит на склад
+                    delay(1000) // ждем когда товар поступит на склад
                 }
             }
         }

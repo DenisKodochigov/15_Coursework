@@ -9,10 +9,10 @@ object Nomenclature {
     private const val timeUnloadMS = 120.toLong()
     private const val timeUnloadSS = 100.toLong()
     private const val timeUnloadF = 80.toLong()
-    private const val timeLoadLS = 200.toLong()
-    private const val timeLoadMS = 120.toLong()
-    private const val timeLoadSS = 100.toLong()
-    private const val timeloadF = 80.toLong()
+    private const val timeLoadLS = 180.toLong()
+    private const val timeLoadMS = 100.toLong()
+    private const val timeLoadSS = 80.toLong()
+    private const val timeloadF = 50.toLong()
 
     init {
         list.add(

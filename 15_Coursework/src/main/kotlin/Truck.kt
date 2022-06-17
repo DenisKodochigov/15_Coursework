@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.Date
 
 class Truck(typeTonnage: TypeTonnage, var name: String) {
     var tonnageTruck = selectTonnage(typeTonnage)
@@ -57,6 +56,7 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
         listProduct.forEach { (t, u) -> print(" ${t.name}=$u(${u * t.weight});") }
         println("")
     }
+
     //Печать состава продуктов в загруженный грузовик.
     fun printloadProductTruck(port: Port) {
         print("${port.name} loading ${name}(${tonnageTruck.volume}):")
@@ -71,7 +71,8 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
 
     //Загружаем в грузовик
     suspend fun loadFromStorageToTruck(port: MoveProduct) {
-        port.noBusy = true
+        val portO = port as Port
+        portO.noBusy = true
         runBlocking {
             launch {
                 port.loadTruck().collect {
@@ -81,7 +82,7 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
                             kitProductTruck[it] = quantity + 1
                             currentTonnage += it.weight
                         } else {
-                            port.noBusy = false
+                            portO.noBusy = false
                             cancel()
                         }
                     }
