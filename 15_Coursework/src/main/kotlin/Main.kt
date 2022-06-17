@@ -4,13 +4,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-var numberTruck = NumberTruck(0, 0)
+var numberTruck = NumberTruck(1, 1)
 
 fun main() {
     val storage = Storage(3, 3)
 
     runBlocking {
-        val queueTruck = Channel<Truck>(3)
+        val queueTruck = Channel<Truck>()
         while (true) {
             //Unload truck
             launch { loadPort(storage, queueTruck, 0) }
@@ -22,10 +22,9 @@ fun main() {
             launch { unloadPort(storage, 1) }
             launch { unloadPort(storage, 2) }
 
-            delay(1000)
+            delay(10000)
             val truck = Truck(TypeTonnage.ALL, "Truck-${numberTruck.load}")
             truck.fillTruckProducts()
-            println("send ${truck.name}")
             queueTruck.send(truck)
             numberTruck.load++
         }
@@ -37,9 +36,9 @@ suspend fun loadPort(storage: Storage, queueTruck: Channel<Truck>, numberPort: I
     val port = storage.listUnloadPort[numberPort]
     if (!port.noBusy) {
         for (truck in queueTruck) {
-            println("Receive truck ${truck.name}, port=$numberPort, busy port=${port.noBusy}")
+            truck.printUnloadProductTruck(port as Port)
             port.unloadTruck(truck)
-            storage.printLoadProductToStorage()
+//            storage.printProductInStorage()
         }
     }
 }
@@ -48,9 +47,10 @@ suspend fun loadPort(storage: Storage, queueTruck: Channel<Truck>, numberPort: I
 suspend fun unloadPort(storage: Storage, numberPort: Int) {
     val port = storage.listLoadPort[numberPort]
     if (!port.noBusy) {
-        numberTruck.unload++
         val truck = Truck(TypeTonnage.FOROUT, "Truck-${numberTruck.unload}")
+        numberTruck.unload++
         truck.loadFromStorageToTruck(port)
-//        storage.printLoadProductToStorage()
+        truck.printloadProductTruck(port as Port)
+        storage.printProductInStorage()
     }
 }

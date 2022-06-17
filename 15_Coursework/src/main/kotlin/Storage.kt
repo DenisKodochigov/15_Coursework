@@ -1,7 +1,3 @@
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import java.util.*
-
 class Storage(
     numberUnloadDock: Int,
     numberLoadDock: Int
@@ -25,9 +21,9 @@ class Storage(
     }
 
     //Печать состава продуктов в подЪезжающем грузовике.
-    fun printLoadProductToStorage() {
+    fun printProductInStorage() {
         var currentTypeProduct = EnumTypeProduct.LARGESIZED
-        print("\n${Date()}: State Storage:")
+        print("\nState Storage:")
         storageProduct.forEach { (p, q) ->
             if (currentTypeProduct == p.typeProduct) {
                 print("${p.name.padStart(13, ' ')}=${q.toString().padEnd(3, ' ')}; ")

@@ -7,16 +7,14 @@ import kotlinx.coroutines.runBlocking
 import java.util.Date
 
 class Truck(typeTonnage: TypeTonnage, var name: String) {
-    private var tonnageTruck = selectTonnage(typeTonnage)
+    var tonnageTruck = selectTonnage(typeTonnage)
     private var currentTonnage = 0.0
     private var kitProductTruck = mutableMapOf<Product, Int>()
 
     //В зависимости от типа тонажа возвращается случайный тонаж из представленных в перечислении
     // или случайный тонаж из двух наименьших по грузоподъемности
     private fun selectTonnage(typeTonnage: TypeTonnage): Tonnage {
-
         val listSmallerTonnage = mutableListOf(Tonnage.LARGE, Tonnage.LARGE)
-
         return if (typeTonnage == TypeTonnage.FOROUT) {
             Tonnage.values().forEach {
                 if (listSmallerTonnage[0].volume > it.volume) listSmallerTonnage[0] = it
@@ -32,10 +30,8 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
 
     //Заполнение грузовика товарами перед тем как встать в очередь на разгрузку
     fun fillTruckProducts() {
-
         var typeProductFOOD = false  //Переменная - грузовик с пищевыми продуктами или с промышленными.
         if (EnumTypeProduct.values().random() == EnumTypeProduct.FOOD) typeProductFOOD = true
-
         while (true) {
             val product = Nomenclature.list.random()
             if (tonnageTruck.volume < product.weight.toInt()) continue
@@ -51,14 +47,25 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
     }
 
     //Печать состава продуктов в подЪезжающем грузовике.
-    fun printLoadProductTruck(port: Port) {
-        print("The ${port.name} have truck ${name}, include product: ")
+    fun printUnloadProductTruck(port: Port) {
+        print("${port.name} unloading ${name}(${tonnageTruck.volume}):")
         val listProduct = mutableMapOf<Product, Int>()
         kitProductTruck.forEach { (t, u) ->
             if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
             else listProduct[t] = u
         }
-        listProduct.forEach { (t, u) -> print("port.printLoadProductTruck ${t.name}=$u; weight:${u * t.weight} ;") }
+        listProduct.forEach { (t, u) -> print(" ${t.name}=$u(${u * t.weight});") }
+        println("")
+    }
+    //Печать состава продуктов в загруженный грузовик.
+    fun printloadProductTruck(port: Port) {
+        print("${port.name} loading ${name}(${tonnageTruck.volume}):")
+        val listProduct = mutableMapOf<Product, Int>()
+        kitProductTruck.forEach { (t, u) ->
+            if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
+            else listProduct[t] = u
+        }
+        listProduct.forEach { (t, u) -> print(" ${t.name}=$u(${u * t.weight});") }
         println("")
     }
 
@@ -77,9 +84,6 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
                             port.noBusy = false
                             cancel()
                         }
-                    } else {
-                        //Итоговое сообщение после загрузки грузовика.
-                        println("For $name(${tonnageTruck.volume}) no product !!!! Truck load on $currentTonnage")
                     }
                 }
             }
@@ -97,8 +101,6 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
                     emit(product)
                     quantity -= 1
                 }
-                //Собщение выводиться при разагрузке одного типа товара с грузовика.
-                println("${Date()}: From $name($currentTonnage) to storage moving: ${product.name}=${kitProductTruck[product]}")
                 kitProductTruck.remove(product)
             }
         }

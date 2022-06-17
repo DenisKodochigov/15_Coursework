@@ -17,7 +17,6 @@ class Port(
     //Загружаем грузовик товаром
     override suspend fun loadTruck(): Flow<Product?> {
         val typeProductLoad = EnumTypeProduct.values().random()
-//        val typeProductLoad = EnumTypeProduct.LARGESIZED
         return flow {
             while (noBusy) { //Крутит пока не загрузит весь грузовик
                 val movingProduct = storage.getProduct(typeProductLoad)
@@ -25,12 +24,10 @@ class Port(
                     emit(movingProduct)
                     delay(movingProduct.timeLoad)
                     storage.removeProduct(movingProduct)
-//                            print("q=${listProduct[product]}; ")
-//                    println("${movingProduct.name}=${storage.getQuantity(movingProduct)}, $noBusy; ")
                 } else {
+                    println("$name not product !!! $typeProductLoad  number truck ${numberTruck.unload}")
                     emit(null)
-//                    println("port.loadTruck  No product $typeProductLoad")
-                    delay(1000) // ждем когда товар поступит на склад
+                    delay(10000) // ждем когда товар поступит на склад
                 }
             }
         }
@@ -43,7 +40,6 @@ class Port(
             launch {
                 truck.unloadFromTruckToStorage().collect {
                     storage.setProduct(it)
-//                  println("Moving to storage product: ${it.name}= ${storage.getQuantity(it)}")
                 }
                 noBusy = false
                 cancel()
