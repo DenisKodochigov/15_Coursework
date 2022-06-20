@@ -78,7 +78,7 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
                 port.loadTruck().collect {
                     if (it != null) {
                         val quantity = kitProductTruck[it] ?: 0  //определяю количество в машине полученного товара
-                        if (tonnageTruck.volume >= (currentTonnage + it.weight)) { //Проверяю поместиться ли он в машине
+                        if (tonnageTruck.volume >= (currentTonnage + it.weight) && DistributionCenter.runningProgram) { //Проверяю поместиться ли он в машине
                             kitProductTruck[it] = quantity + 1
                             currentTonnage += it.weight
                         } else {
@@ -94,15 +94,14 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
     //Разгружаем грузовик
     suspend fun unloadFromTruckToStorage(): Flow<Product> {
         return flow {
-            while (kitProductTruck.isNotEmpty()) {
-                val product: Product = kitProductTruck.firstNotNullOf { (p, _) -> p }
-                var quantity = kitProductTruck[product] ?: 0
-                while (quantity > 0) {
-                    delay(product.timeUnload)
-                    emit(product)
+            for (productTruck in kitProductTruck) {
+                var quantity = productTruck.value
+                while (quantity > 0 && DistributionCenter.runningProgram) {
+                    delay(productTruck.key.timeUnload)
+                    emit(productTruck.key)
                     quantity -= 1
                 }
-                kitProductTruck.remove(product)
+                if(!DistributionCenter.runningProgram) break
             }
         }
     }

@@ -15,7 +15,7 @@ class Port(
     override suspend fun loadTruck(): Flow<Product?> {
         val typeProductLoad = EnumTypeProduct.values().random()
         return flow {
-            while (noBusy) { //Крутит пока не загрузит весь грузовик
+            while (noBusy && DistributionCenter.runningProgram) { //Крутит пока не загрузит весь грузовик
                 val movingProduct = storage.getProduct(typeProductLoad)
                 if (movingProduct != null) {
                     emit(movingProduct)
