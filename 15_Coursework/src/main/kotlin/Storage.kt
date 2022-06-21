@@ -23,7 +23,7 @@ class Storage(
     //Печать состава продуктов в подЪезжающем грузовике.
     fun printProductInStorage() {
         var currentTypeProduct = EnumTypeProduct.LARGESIZED
-        print("\nState Storage:")
+        print("State Storage:")
         storageProduct.forEach { (p, q) ->
             if (currentTypeProduct == p.typeProduct) {
                 print("${p.name.padStart(13, ' ')}=${q.toString().padEnd(3, ' ')}; ")
@@ -36,7 +36,7 @@ class Storage(
                 )
             }
         }
-        println("\n")
+        println("")
     }
 
     @Synchronized

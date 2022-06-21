@@ -1,9 +1,6 @@
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class Truck(typeTonnage: TypeTonnage, var name: String) {
     var tonnageTruck = selectTonnage(typeTonnage)
@@ -47,7 +44,7 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
 
     //Печать состава продуктов в подЪезжающем грузовике.
     fun printUnloadProductTruck(port: Port) {
-        print("${port.name} unloading ${name}(${tonnageTruck.volume}):")
+        print("\n${port.name} unloading ${name}(${tonnageTruck.volume}):")
         val listProduct = mutableMapOf<Product, Int>()
         kitProductTruck.forEach { (t, u) ->
             if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
@@ -59,7 +56,7 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
 
     //Печать состава продуктов в загруженный грузовик.
     fun printloadProductTruck(port: Port) {
-        print("${port.name} loading ${name}(${tonnageTruck.volume}):")
+        print("\n${port.name} loading ${name}(${tonnageTruck.volume}):")
         val listProduct = mutableMapOf<Product, Int>()
         kitProductTruck.forEach { (t, u) ->
             if (listProduct[t] != null) listProduct[t] = listProduct[t]!! + u
@@ -73,18 +70,17 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
     suspend fun loadFromStorageToTruck(port: MoveProduct) {
         val portO = port as Port
         portO.noBusy = true
-        runBlocking {
-            launch {
-                port.loadTruck().collect {
-                    if (it != null) {
-                        val quantity = kitProductTruck[it] ?: 0  //определяю количество в машине полученного товара
-                        if (tonnageTruck.volume >= (currentTonnage + it.weight) && DistributionCenter.runningProgram) { //Проверяю поместиться ли он в машине
-                            kitProductTruck[it] = quantity + 1
-                            currentTonnage += it.weight
-                        } else {
-                            portO.noBusy = false
-                            cancel()
-                        }
+        DistributionCenter.scope.launch {
+            port.loadTruck().collect {
+                if (it != null) {
+                    val quantity = kitProductTruck[it] ?: 0  //определяю количество в машине полученного товара
+                    if (tonnageTruck.volume >= (currentTonnage + it.weight)) { //Проверяю поместиться ли он в машине
+                        kitProductTruck[it] = quantity + 1
+                        currentTonnage += it.weight
+                    } else {
+                        portO.noBusy = false
+                        printloadProductTruck(portO)
+                        cancel()
                     }
                 }
             }
@@ -96,12 +92,11 @@ class Truck(typeTonnage: TypeTonnage, var name: String) {
         return flow {
             for (productTruck in kitProductTruck) {
                 var quantity = productTruck.value
-                while (quantity > 0 && DistributionCenter.runningProgram) {
+                while (quantity > 0) {
                     delay(productTruck.key.timeUnload)
                     emit(productTruck.key)
                     quantity -= 1
                 }
-                if(!DistributionCenter.runningProgram) break
             }
         }
     }
