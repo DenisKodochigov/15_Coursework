@@ -1,7 +1,7 @@
-import Port.Port
-import Product.Storage
-import Truck.Truck
-import Truck.TypeTonnage
+import port.Port
+import product.Storage
+import truck.Truck
+import truck.TypeTonnage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 

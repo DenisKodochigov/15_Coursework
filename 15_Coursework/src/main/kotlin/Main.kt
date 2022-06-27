@@ -1,4 +1,4 @@
-import Truck.NumberTruck
+import truck.NumberTruck
 
 var numberTruck = NumberTruck(1, 1)
 
