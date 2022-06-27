@@ -16,7 +16,6 @@ object DistributionCenter {
         //Unload truck
         for (i in 1.. numberLoadPort){
             scope.launch(CoroutineName("LOAD$i")) { loadPort(storage, queueTruck, i) }
-
         }
         //Load truck
         for (i in 1.. numberUnloadPort){
@@ -42,6 +41,7 @@ object DistributionCenter {
     private suspend fun unloadPort(storage: Storage, numberPort: Int) {
         val port = Port(false, "PORT-LOAD_N$numberPort", storage)
         while (true) {
+            yield()
             if (!port.noBusy) {
                 val truck = Truck(TypeTonnage.FOROUT, "Truck-L${numberTruck.unload}")
                 numberTruck.unload++
@@ -54,6 +54,7 @@ object DistributionCenter {
     private suspend fun loadPort(storage: Storage, queueTruck: Channel<Truck>, numberPort: Int) {
         val port = Port(false, "PORT-UNLOAD_N$numberPort", storage)
         while (true) {
+            yield()
             if (!port.noBusy) {
                 val truck = queueTruck.receive()
                 truck.printUnloadProductTruck(port)
